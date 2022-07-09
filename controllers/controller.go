@@ -9,7 +9,9 @@ import (
 )
 
 func ShowStudents(c *gin.Context) {
-	c.JSON(200, models.Students)
+	var students []models.Student
+	database.DB.Find(&students)
+	c.JSON(200, students)
 }
 
 func Hello(c *gin.Context) {
@@ -28,4 +30,55 @@ func CreateNewStudent(c *gin.Context) {
 	database.DB.Create(&student)
 	c.JSON(http.StatusOK, student)
 
+}
+
+func SearchStudentById(c *gin.Context) {
+	var student models.Student
+	id := c.Params.ByName("id")
+	database.DB.First(&student, id)
+
+	if student.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+	c.JSON(http.StatusOK, student)
+}
+
+func DeleteStudent(c *gin.Context) {
+	var student models.Student
+	id := c.Params.ByName("id")
+	database.DB.First(&student, id)
+
+	if student.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+	database.DB.Delete(&student)
+	c.JSON(http.StatusOK, gin.H{"id #" + id: "deleted"})
+}
+
+func UpdateStudent(c *gin.Context) {
+	var student models.Student
+	id := c.Params.ByName("id")
+	database.DB.First(&student, id)
+
+	if err := c.ShouldBindJSON(&student); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	database.DB.Model(&student).UpdateColumns(student)
+	c.JSON(http.StatusOK, student)
+}
+
+func SearchStudentByCPF(c *gin.Context) {
+	var student models.Student
+	cpf := c.Params.ByName("cpf")
+	database.DB.Where("cpf = ?", cpf).First(&student)
+
+	if student.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+	c.JSON(http.StatusOK, student)
 }
