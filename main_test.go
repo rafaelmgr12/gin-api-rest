@@ -36,6 +36,10 @@ func DeleteStudentMock() {
 	database.DB.Delete(&student, ID)
 }
 
+func TestExample(t *testing.T) {
+	assert.Equal(t, 1, 1, "Should be equal")
+}
+
 func TestVerifiedHelloParamater(t *testing.T) {
 	router := SetupTestRouter()
 	router.GET("/hello/:name", controllers.Hello)
